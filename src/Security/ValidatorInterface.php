@@ -13,7 +13,7 @@ interface ValidatorInterface
 {
     /**
      * Validate a parsed URL.
-     * 
+     *
      * @throws \Neologik\ComposerGitInstaller\Exception\SecurityException if validation fails
      */
     public function validate(ParsedUrl $parsedUrl): void;

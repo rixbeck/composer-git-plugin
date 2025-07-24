@@ -14,7 +14,7 @@ interface UrlParserInterface
     /**
      * Set the next parser in the chain.
      */
-    public function setNext(UrlParserInterface $parser): UrlParserInterface;
+    public function setNext(self $parser): self;
 
     /**
      * Attempt to parse the given URL.

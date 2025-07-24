@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Tests\Unit\Model;
 
-use PHPUnit\Framework\TestCase;
 use Neologik\ComposerGitInstaller\Model\ParsedUrl;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for ParsedUrl model.
+ *
+ * @internal
+ *
+ * @small
  */
 class ParsedUrlTest extends TestCase
 {
-    public function testConstructorAndGetters(): void
+    /**
+     * @test
+     */
+    public function constructorAndGetters(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main#subdirectory',
@@ -23,21 +30,24 @@ class ParsedUrlTest extends TestCase
             reference: 'main',
             referenceType: 'branch',
             subdirectory: 'subdirectory',
-            port: 443
+            port: 443,
         );
 
-        $this->assertEquals('git+https://github.com/owner/repo@main#subdirectory', $parsedUrl->originalUrl);
-        $this->assertEquals('https', $parsedUrl->scheme);
-        $this->assertEquals('github.com', $parsedUrl->host);
-        $this->assertEquals('owner', $parsedUrl->owner);
-        $this->assertEquals('repo', $parsedUrl->repository);
-        $this->assertEquals('main', $parsedUrl->reference);
-        $this->assertEquals('branch', $parsedUrl->referenceType);
-        $this->assertEquals('subdirectory', $parsedUrl->subdirectory);
-        $this->assertEquals(443, $parsedUrl->port);
+        self::assertEquals('git+https://github.com/owner/repo@main#subdirectory', $parsedUrl->originalUrl);
+        self::assertEquals('https', $parsedUrl->scheme);
+        self::assertEquals('github.com', $parsedUrl->host);
+        self::assertEquals('owner', $parsedUrl->owner);
+        self::assertEquals('repo', $parsedUrl->repository);
+        self::assertEquals('main', $parsedUrl->reference);
+        self::assertEquals('branch', $parsedUrl->referenceType);
+        self::assertEquals('subdirectory', $parsedUrl->subdirectory);
+        self::assertEquals(443, $parsedUrl->port);
     }
 
-    public function testGetGitUrlHttps(): void
+    /**
+     * @test
+     */
+    public function getGitUrlHttps(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main',
@@ -46,13 +56,16 @@ class ParsedUrlTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('https://github.com/owner/repo', $parsedUrl->getGitUrl());
+        self::assertEquals('https://github.com/owner/repo', $parsedUrl->getGitUrl());
     }
 
-    public function testGetGitUrlSsh(): void
+    /**
+     * @test
+     */
+    public function getGitUrlSsh(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+ssh://git@github.com/owner/repo@main',
@@ -61,13 +74,16 @@ class ParsedUrlTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('git@github.com:owner/repo', $parsedUrl->getGitUrl());
+        self::assertEquals('git@github.com:owner/repo', $parsedUrl->getGitUrl());
     }
 
-    public function testGetGitUrlWithPort(): void
+    /**
+     * @test
+     */
+    public function getGitUrlWithPort(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://gitlab.example.com:8080/owner/repo@main',
@@ -77,13 +93,16 @@ class ParsedUrlTest extends TestCase
             repository: 'repo',
             reference: 'main',
             referenceType: 'branch',
-            port: 8080
+            port: 8080,
         );
 
-        $this->assertEquals('https://gitlab.example.com:8080/owner/repo', $parsedUrl->getGitUrl());
+        self::assertEquals('https://gitlab.example.com:8080/owner/repo', $parsedUrl->getGitUrl());
     }
 
-    public function testGetSuggestedPackageNameWithBranch(): void
+    /**
+     * @test
+     */
+    public function getSuggestedPackageNameWithBranch(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/symfony/symfony@6.3',
@@ -92,13 +111,16 @@ class ParsedUrlTest extends TestCase
             owner: 'symfony',
             repository: 'symfony',
             reference: '6.3',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('symfony/symfony-6.3', $parsedUrl->getSuggestedPackageName());
+        self::assertEquals('symfony/symfony-6.3', $parsedUrl->getSuggestedPackageName());
     }
 
-    public function testGetSuggestedPackageNameWithMainBranch(): void
+    /**
+     * @test
+     */
+    public function getSuggestedPackageNameWithMainBranch(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/symfony/symfony@main',
@@ -107,13 +129,16 @@ class ParsedUrlTest extends TestCase
             owner: 'symfony',
             repository: 'symfony',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('symfony/symfony', $parsedUrl->getSuggestedPackageName());
+        self::assertEquals('symfony/symfony', $parsedUrl->getSuggestedPackageName());
     }
 
-    public function testGetSuggestedPackageNameWithMasterBranch(): void
+    /**
+     * @test
+     */
+    public function getSuggestedPackageNameWithMasterBranch(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/symfony/symfony@master',
@@ -122,13 +147,16 @@ class ParsedUrlTest extends TestCase
             owner: 'symfony',
             repository: 'symfony',
             reference: 'master',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('symfony/symfony', $parsedUrl->getSuggestedPackageName());
+        self::assertEquals('symfony/symfony', $parsedUrl->getSuggestedPackageName());
     }
 
-    public function testHasSubdirectory(): void
+    /**
+     * @test
+     */
+    public function hasSubdirectory(): void
     {
         $withSubdirectory = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main#subdir',
@@ -138,7 +166,7 @@ class ParsedUrlTest extends TestCase
             repository: 'repo',
             reference: 'main',
             referenceType: 'branch',
-            subdirectory: 'subdir'
+            subdirectory: 'subdir',
         );
 
         $withoutSubdirectory = new ParsedUrl(
@@ -148,14 +176,17 @@ class ParsedUrlTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertTrue($withSubdirectory->hasSubdirectory());
-        $this->assertFalse($withoutSubdirectory->hasSubdirectory());
+        self::assertTrue($withSubdirectory->hasSubdirectory());
+        self::assertFalse($withoutSubdirectory->hasSubdirectory());
     }
 
-    public function testGetRepositoryIdentifier(): void
+    /**
+     * @test
+     */
+    public function getRepositoryIdentifier(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/symfony/console@main',
@@ -164,16 +195,18 @@ class ParsedUrlTest extends TestCase
             owner: 'symfony',
             repository: 'console',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
-        $this->assertEquals('symfony/console', $parsedUrl->getRepositoryIdentifier());
+        self::assertEquals('symfony/console', $parsedUrl->getRepositoryIdentifier());
     }
 
     /**
      * @dataProvider referenceTypeProvider
+     *
+     * @test
      */
-    public function testDifferentReferenceTypes(string $reference, string $expectedType): void
+    public function differentReferenceTypes(string $reference, string $expectedType): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: "git+https://github.com/owner/repo@{$reference}",
@@ -182,10 +215,10 @@ class ParsedUrlTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: $reference,
-            referenceType: $expectedType
+            referenceType: $expectedType,
         );
 
-        $this->assertEquals($expectedType, $parsedUrl->referenceType);
+        self::assertEquals($expectedType, $parsedUrl->referenceType);
     }
 
     /**

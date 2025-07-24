@@ -19,12 +19,16 @@ abstract class AbstractUrlParser implements UrlParserInterface
     public function setNext(UrlParserInterface $parser): UrlParserInterface
     {
         $this->nextParser = $parser;
+
         return $parser;
     }
 
     /**
      * Attempt to parse the given URL.
      * If this parser cannot handle it, delegate to the next parser in the chain.
+     *
+     * @param string $url The URL to parse
+     * @return ParsedUrl|null The parsed URL or null if not handled
      */
     public function parse(string $url): ?ParsedUrl
     {
@@ -32,7 +36,7 @@ abstract class AbstractUrlParser implements UrlParserInterface
             return $this->doParse($url);
         }
 
-        if ($this->nextParser !== null) {
+        if (null !== $this->nextParser) {
             return $this->nextParser->parse($url);
         }
 
@@ -55,13 +59,12 @@ abstract class AbstractUrlParser implements UrlParserInterface
     {
         // Default to branch type
         $referenceType = 'branch';
-        
+
         // Check if it looks like a commit hash (40 character hex string)
         if (preg_match('/^[a-f0-9]{40}$/i', $reference)) {
             $referenceType = 'commit';
-        }
-        // Check if it looks like a tag (starts with v followed by semantic version)
-        elseif (preg_match('/^v?\d+\.\d+(\.\d+)?/', $reference)) {
+        } elseif (preg_match('/^v?\d+\.\d+(\.\d+)?/', $reference)) {
+            // Check if it looks like a tag (starts with v followed by semantic version)
             $referenceType = 'tag';
         }
 
@@ -73,12 +76,13 @@ abstract class AbstractUrlParser implements UrlParserInterface
      */
     protected function extractSubdirectory(string $url): ?string
     {
-        $fragmentPos = strpos($url, '#');
-        if ($fragmentPos === false) {
+        $fragmentPos = mb_strpos($url, '#');
+        if (false === $fragmentPos) {
             return null;
         }
 
-        $subdirectory = substr($url, $fragmentPos + 1);
+        $subdirectory = mb_substr($url, $fragmentPos + 1);
+
         return trim($subdirectory, '/') ?: null;
     }
 
@@ -89,11 +93,11 @@ abstract class AbstractUrlParser implements UrlParserInterface
     {
         // Remove git+ prefix
         $url = preg_replace('/^git\+/', '', $url);
-        
+
         // Remove fragment (subdirectory)
-        $fragmentPos = strpos($url, '#');
-        if ($fragmentPos !== false) {
-            $url = substr($url, 0, $fragmentPos);
+        $fragmentPos = mb_strpos($url, '#');
+        if (false !== $fragmentPos) {
+            $url = mb_substr($url, 0, $fragmentPos);
         }
 
         return $url;

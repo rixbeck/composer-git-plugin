@@ -18,7 +18,7 @@ class ParsedUrl
         public readonly string $reference,
         public readonly string $referenceType,
         public readonly ?string $subdirectory = null,
-        public readonly ?int $port = null
+        public readonly ?int $port = null,
     ) {
     }
 
@@ -28,11 +28,11 @@ class ParsedUrl
     public function getGitUrl(): string
     {
         $url = sprintf('%s://%s', $this->scheme, $this->host);
-        
+
         if ($this->port !== null) {
             $url .= ':' . $this->port;
         }
-        
+
         if ($this->scheme === 'ssh' && str_contains($this->originalUrl, '@')) {
             // SSH format: git@host:owner/repo
             $url = sprintf('%s@%s:%s/%s', 'git', $this->host, $this->owner, $this->repository);
@@ -40,7 +40,7 @@ class ParsedUrl
             // HTTPS format: https://host/owner/repo
             $url .= sprintf('/%s/%s', $this->owner, $this->repository);
         }
-        
+
         return $url;
     }
 
@@ -50,12 +50,12 @@ class ParsedUrl
     public function getSuggestedPackageName(): string
     {
         $name = sprintf('%s/%s', $this->owner, $this->repository);
-        
+
         if ($this->reference !== 'main' && $this->reference !== 'master') {
             $name .= '-' . $this->reference;
         }
-        
-        return strtolower($name);
+
+        return mb_strtolower($name);
     }
 
     /**

@@ -9,12 +9,20 @@ namespace Neologik\ComposerGitInstaller\Exception;
  */
 class SecurityException extends GitInstallException
 {
-    public function __construct(string $message, string $securityContext = '', int $code = 0, ?\Exception $previous = null)
+    /**
+     * SecurityException constructor.
+     *
+     * @param string          $message  The exception message
+     * @param string          $context  Security context for the exception
+     * @param int             $code     The exception code
+     * @param \Exception|null $previous The previous exception for chaining
+     */
+    public function __construct(string $message, string $context = '', int $code = 0, ?\Exception $previous = null)
     {
-        if ($securityContext) {
-            $message = sprintf('[%s] %s', $securityContext, $message);
+        if ($context) {
+            $message = sprintf('[%s] %s', $context, $message);
         }
-        
+
         parent::__construct($message, $code, $previous);
     }
 }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Parser;
 
-use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 use Neologik\ComposerGitInstaller\Exception\InvalidUrlException;
+use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 
 /**
  * Parser for HTTPS git+ URLs.
- * Handles formats like: git+https://github.com/owner/repo@branch
+ * Handles formats like: git+https://github.com/owner/repo@branch.
  */
 class HttpsUrlParser extends AbstractUrlParser
 {
@@ -31,16 +31,16 @@ class HttpsUrlParser extends AbstractUrlParser
         $cleanUrl = $this->cleanUrl($url);
 
         // Remove https:// prefix
-        $urlParts = substr($cleanUrl, 8);
-        
+        $urlParts = mb_substr($cleanUrl, 8);
+
         // Split by @ to separate URL from reference
-        $atPos = strrpos($urlParts, '@');
-        if ($atPos === false) {
+        $atPos = mb_strrpos($urlParts, '@');
+        if (false === $atPos) {
             throw new InvalidUrlException($originalUrl, 'Missing @ separator for branch/tag/commit');
         }
 
-        $reference = substr($urlParts, $atPos + 1);
-        $urlWithoutRef = substr($urlParts, 0, $atPos);
+        $reference = mb_substr($urlParts, $atPos + 1);
+        $urlWithoutRef = mb_substr($urlParts, 0, $atPos);
 
         if (empty($reference)) {
             throw new InvalidUrlException($originalUrl, 'Empty reference (branch/tag/commit)');
@@ -58,7 +58,7 @@ class HttpsUrlParser extends AbstractUrlParser
 
         // Remove .git suffix if present
         if (str_ends_with($repository, '.git')) {
-            $repository = substr($repository, 0, -4);
+            $repository = mb_substr($repository, 0, -4);
         }
 
         // Extract port if present in host
@@ -79,7 +79,7 @@ class HttpsUrlParser extends AbstractUrlParser
             reference: $reference,
             referenceType: $referenceType,
             subdirectory: $subdirectory,
-            port: $port
+            port: $port,
         );
     }
 }

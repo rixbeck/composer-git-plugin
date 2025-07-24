@@ -43,7 +43,7 @@ class GitInstallPlugin implements PluginInterface
             $io,
             $urlParser,
             $packageResolver,
-            $validator
+            $validator,
         );
 
         // Register the event subscriber with Composer's event dispatcher
@@ -54,11 +54,14 @@ class GitInstallPlugin implements PluginInterface
 
     /**
      * Deactivate the plugin.
+     *
+     * @param Composer    $composer The Composer instance
+     * @param IOInterface $io       The input/output interface
      */
     public function deactivate(Composer $composer, IOInterface $io): void
     {
         // Remove event subscriber from dispatcher
-        if ($this->eventSubscriber !== null && $this->composer !== null) {
+        if (null !== $this->eventSubscriber && null !== $this->composer) {
             $eventDispatcher = $this->composer->getEventDispatcher();
             foreach ($this->eventSubscriber->getSubscribedEvents() as $eventName => $params) {
                 if (is_string($params)) {
@@ -78,6 +81,9 @@ class GitInstallPlugin implements PluginInterface
 
     /**
      * Uninstall the plugin.
+     *
+     * @param Composer    $composer The Composer instance
+     * @param IOInterface $io       The input/output interface
      */
     public function uninstall(Composer $composer, IOInterface $io): void
     {
@@ -86,6 +92,8 @@ class GitInstallPlugin implements PluginInterface
 
     /**
      * Get the event subscriber instance for testing purposes.
+     *
+     * @return GitInstallEventSubscriber|null The event subscriber instance or null
      */
     public function getEventSubscriber(): ?GitInstallEventSubscriber
     {

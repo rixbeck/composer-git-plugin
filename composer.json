@@ -45,7 +45,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "phpunit --testdox",
+        "test": "vendor/bin/phpunit --testdox",
         "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage",
         "cs-check": "phpcs src/ tests/",
         "cs-fix": "phpcbf src/ tests/",

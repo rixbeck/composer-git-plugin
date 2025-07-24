@@ -11,17 +11,27 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for URL format validator.
+ *
+ * @internal
+ *
+ * @small
  */
 class UrlFormatValidatorTest extends TestCase
 {
     private UrlFormatValidator $validator;
 
-    public function testGetName(): void
+    /**
+     * @test
+     */
+    public function getName(): void
     {
-        $this->assertEquals('URL Format Validator', $this->validator->getName());
+        self::assertEquals('URL Format Validator', $this->validator->getName());
     }
 
-    public function testValidateValidUrl(): void
+    /**
+     * @test
+     */
+    public function validateValidUrl(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main',
@@ -30,15 +40,18 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         // Should not throw exception
         $this->validator->validate($parsedUrl);
-        $this->assertTrue(true); // Assert that no exception was thrown
+        self::assertTrue(true); // Assert that no exception was thrown
     }
 
-    public function testValidateInvalidScheme(): void
+    /**
+     * @test
+     */
+    public function validateInvalidScheme(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+ftp://github.com/owner/repo@main',
@@ -47,7 +60,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -55,7 +68,10 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
-    public function testValidateIpAddress(): void
+    /**
+     * @test
+     */
+    public function validateIpAddress(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://192.168.1.1/owner/repo@main',
@@ -64,7 +80,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -72,9 +88,12 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
-    public function testValidateExcessivelyLongUrl(): void
+    /**
+     * @test
+     */
+    public function validateExcessivelyLongUrl(): void
     {
-        $longUrl = 'git+https://github.com/'.str_repeat('a', 2500).'/repo@main';
+        $longUrl = 'git+https://github.com/' . str_repeat('a', 2500) . '/repo@main';
         $parsedUrl = new ParsedUrl(
             originalUrl: $longUrl,
             scheme: 'https',
@@ -82,7 +101,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: str_repeat('a', 2500),
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -90,7 +109,10 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
-    public function testValidateEmptyOwner(): void
+    /**
+     * @test
+     */
+    public function validateEmptyOwner(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com//repo@main',
@@ -99,7 +121,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: '',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -107,7 +129,10 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
-    public function testValidatePathTraversalInSubdirectory(): void
+    /**
+     * @test
+     */
+    public function validatePathTraversalInSubdirectory(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main#../malicious',
@@ -117,7 +142,7 @@ class UrlFormatValidatorTest extends TestCase
             repository: 'repo',
             reference: 'main',
             referenceType: 'branch',
-            subdirectory: '../malicious'
+            subdirectory: '../malicious',
         );
 
         $this->expectException(SecurityException::class);
@@ -125,7 +150,10 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
-    public function testValidateInvalidCharacters(): void
+    /**
+     * @test
+     */
+    public function validateInvalidCharacters(): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: 'git+https://github.com/owner/repo@main',
@@ -134,7 +162,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner<script>',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -144,8 +172,10 @@ class UrlFormatValidatorTest extends TestCase
 
     /**
      * @dataProvider validHostProvider
+     *
+     * @test
      */
-    public function testValidateValidHosts(string $host): void
+    public function validateValidHosts(string $host): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: "git+https://{$host}/owner/repo@main",
@@ -154,12 +184,12 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         // Should not throw exception
         $this->validator->validate($parsedUrl);
-        $this->assertTrue(true);
+        self::assertTrue(true);
     }
 
     /**
@@ -178,8 +208,10 @@ class UrlFormatValidatorTest extends TestCase
 
     /**
      * @dataProvider invalidHostProvider
+     *
+     * @test
      */
-    public function testValidateInvalidHosts(string $host): void
+    public function validateInvalidHosts(string $host): void
     {
         $parsedUrl = new ParsedUrl(
             originalUrl: "git+https://{$host}/owner/repo@main",
@@ -188,7 +220,7 @@ class UrlFormatValidatorTest extends TestCase
             owner: 'owner',
             repository: 'repo',
             reference: 'main',
-            referenceType: 'branch'
+            referenceType: 'branch',
         );
 
         $this->expectException(SecurityException::class);
@@ -209,6 +241,9 @@ class UrlFormatValidatorTest extends TestCase
         ];
     }
 
+    /**
+     * @test
+     */
     protected function setUp(): void
     {
         $this->validator = new UrlFormatValidator();

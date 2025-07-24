@@ -3,10 +3,7 @@
 <ruleset name="Custom Standard">
     <description>Custom coding standard based on Symfony</description>
 
-    <!-- Include the whole Symfony standard -->
-    <rule ref="Symfony">
-        <!-- Disable Yoda conditions -->
-        <exclude name="Symfony.ControlStructure.YodaConditions"/>
+    <rule ref="PSR12">
     </rule>
 
     <!-- Array syntax should be short -->
@@ -23,7 +20,7 @@
     <!-- Concatenation spacing -->
     <rule ref="Squiz.Strings.ConcatenationSpacing">
         <properties>
-            <property name="spacing" value="0"/>
+            <property name="spacing" value="1"/>
             <property name="ignoreNewlines" value="true"/>
         </properties>
     </rule>

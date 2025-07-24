@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Security;
 
-use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 use Neologik\ComposerGitInstaller\Exception\SecurityException;
+use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 
 /**
  * Validates URL format and structure for security compliance.
  */
 class UrlFormatValidator implements ValidatorInterface
 {
-    private const MAX_URL_LENGTH = 2048;
-    private const MAX_COMPONENT_LENGTH = 255;
-    private const ALLOWED_SCHEMES = ['https', 'ssh'];
-    private const BLOCKED_CHARACTERS = ['<', '>', '"', '\'', '&', '\0', '\n', '\r', '\t'];
-
     /**
      * Validate URL format and structure.
      */
@@ -43,10 +38,10 @@ class UrlFormatValidator implements ValidatorInterface
      */
     private function validateUrlLength(ParsedUrl $parsedUrl): void
     {
-        if (strlen($parsedUrl->originalUrl) > self::MAX_URL_LENGTH) {
+        if (mb_strlen($parsedUrl->originalUrl) > self::MAX_URL_LENGTH) {
             throw new SecurityException(
                 sprintf('URL exceeds maximum length of %d characters', self::MAX_URL_LENGTH),
-                'URL_LENGTH'
+                'URL_LENGTH',
             );
         }
     }
@@ -58,11 +53,12 @@ class UrlFormatValidator implements ValidatorInterface
     {
         if (!in_array($parsedUrl->scheme, self::ALLOWED_SCHEMES, true)) {
             throw new SecurityException(
-                sprintf('Scheme "%s" is not allowed. Allowed schemes: %s', 
-                    $parsedUrl->scheme, 
-                    implode(', ', self::ALLOWED_SCHEMES)
+                sprintf(
+                    'Scheme "%s" is not allowed. Allowed schemes: %s',
+                    $parsedUrl->scheme,
+                    implode(', ', self::ALLOWED_SCHEMES),
                 ),
-                'INVALID_SCHEME'
+                'INVALID_SCHEME',
             );
         }
     }
@@ -73,27 +69,29 @@ class UrlFormatValidator implements ValidatorInterface
     private function validateHost(ParsedUrl $parsedUrl): void
     {
         $host = $parsedUrl->host;
-        
-        if (strlen($host) > self::MAX_COMPONENT_LENGTH) {
+
+        if (mb_strlen($host) > self::MAX_COMPONENT_LENGTH) {
             throw new SecurityException(
                 sprintf('Host exceeds maximum length of %d characters', self::MAX_COMPONENT_LENGTH),
-                'HOST_LENGTH'
+                'HOST_LENGTH',
             );
         }
 
         // Check for IP addresses (should use domain names)
-        if (filter_var($host, FILTER_VALIDATE_IP)) {
+        if (filter_var($host, \FILTER_VALIDATE_IP)) {
             throw new SecurityException(
                 'IP addresses are not allowed, please use domain names',
-                'IP_ADDRESS_BLOCKED'
+                'IP_ADDRESS_BLOCKED',
             );
         }
 
         // Basic domain validation
-        if (!preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/', $host)) {
+        $domainPattern = '/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?'
+            . '(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/';
+        if (!preg_match($domainPattern, $host)) {
             throw new SecurityException(
                 'Invalid host format',
-                'INVALID_HOST'
+                'INVALID_HOST',
             );
         }
     }
@@ -110,17 +108,17 @@ class UrlFormatValidator implements ValidatorInterface
 
         /** @var array<string,string> $components */
         foreach ($components as $name => $value) {
-            if (strlen($value) > self::MAX_COMPONENT_LENGTH) {
+            if (mb_strlen($value) > self::MAX_COMPONENT_LENGTH) {
                 throw new SecurityException(
                     sprintf('%s exceeds maximum length of %d characters', ucfirst($name), self::MAX_COMPONENT_LENGTH),
-                    'COMPONENT_LENGTH'
+                    'COMPONENT_LENGTH',
                 );
             }
 
             if (empty($value)) {
                 throw new SecurityException(
                     sprintf('%s cannot be empty', ucfirst($name)),
-                    'EMPTY_COMPONENT'
+                    'EMPTY_COMPONENT',
                 );
             }
 
@@ -134,18 +132,18 @@ class UrlFormatValidator implements ValidatorInterface
     private function validateReference(ParsedUrl $parsedUrl): void
     {
         $reference = $parsedUrl->reference;
-        
-        if (strlen($reference) > self::MAX_COMPONENT_LENGTH) {
+
+        if (mb_strlen($reference) > self::MAX_COMPONENT_LENGTH) {
             throw new SecurityException(
                 sprintf('Reference exceeds maximum length of %d characters', self::MAX_COMPONENT_LENGTH),
-                'REFERENCE_LENGTH'
+                'REFERENCE_LENGTH',
             );
         }
 
         if (empty($reference)) {
             throw new SecurityException(
                 'Reference cannot be empty',
-                'EMPTY_REFERENCE'
+                'EMPTY_REFERENCE',
             );
         }
 
@@ -154,19 +152,22 @@ class UrlFormatValidator implements ValidatorInterface
 
     /**
      * Validate subdirectory if present.
+     * This checks for path traversal attempts and invalid characters.
+     * @param ParsedUrl $parsedUrl The parsed URL to validate
+     * @throws SecurityException if subdirectory is invalid
      */
     private function validateSubdirectory(ParsedUrl $parsedUrl): void
     {
         $subdirectory = $parsedUrl->subdirectory;
-        
-        if ($subdirectory === null) {
+
+        if (null === $subdirectory) {
             return;
         }
 
-        if (strlen($subdirectory) > self::MAX_COMPONENT_LENGTH) {
+        if (mb_strlen($subdirectory) > self::MAX_COMPONENT_LENGTH) {
             throw new SecurityException(
                 sprintf('Subdirectory exceeds maximum length of %d characters', self::MAX_COMPONENT_LENGTH),
-                'SUBDIRECTORY_LENGTH'
+                'SUBDIRECTORY_LENGTH',
             );
         }
 
@@ -174,7 +175,7 @@ class UrlFormatValidator implements ValidatorInterface
         if (str_contains($subdirectory, '..') || str_contains($subdirectory, './')) {
             throw new SecurityException(
                 'Path traversal detected in subdirectory',
-                'PATH_TRAVERSAL'
+                'PATH_TRAVERSAL',
             );
         }
 
@@ -190,9 +191,13 @@ class UrlFormatValidator implements ValidatorInterface
             if (str_contains($value, $char)) {
                 throw new SecurityException(
                     sprintf('Invalid character detected in %s: %s', $componentName, json_encode($char)),
-                    'INVALID_CHARACTER'
+                    'INVALID_CHARACTER',
                 );
             }
         }
     }
+    private const MAX_URL_LENGTH = 2048;
+    private const MAX_COMPONENT_LENGTH = 255;
+    private const ALLOWED_SCHEMES = ['https', 'ssh'];
+    private const BLOCKED_CHARACTERS = ['<', '>', '"', '\'', '&', '\0', '\n', '\r', '\t'];
 }

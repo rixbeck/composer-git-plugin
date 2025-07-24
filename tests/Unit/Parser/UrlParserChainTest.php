@@ -4,97 +4,122 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Tests\Unit\Parser;
 
-use PHPUnit\Framework\TestCase;
-use Neologik\ComposerGitInstaller\Parser\UrlParserChain;
 use Neologik\ComposerGitInstaller\Exception\InvalidUrlException;
+use Neologik\ComposerGitInstaller\Parser\UrlParserChain;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for URL parser chain.
+ *
+ * @internal
+ *
+ * @small
  */
 class UrlParserChainTest extends TestCase
 {
     private UrlParserChain $parserChain;
 
-    protected function setUp(): void
+    /**
+     * @test
+     */
+    public function canParseHttpsUrls(): void
     {
-        $this->parserChain = new UrlParserChain();
+        self::assertTrue($this->parserChain->canParse('git+https://github.com/owner/repo@branch'));
+        self::assertTrue($this->parserChain->canParse('git+https://gitlab.com/group/project@v1.0.0'));
     }
 
-    public function testCanParseHttpsUrls(): void
+    /**
+     * @test
+     */
+    public function canParseSshUrls(): void
     {
-        $this->assertTrue($this->parserChain->canParse('git+https://github.com/owner/repo@branch'));
-        $this->assertTrue($this->parserChain->canParse('git+https://gitlab.com/group/project@v1.0.0'));
+        self::assertTrue($this->parserChain->canParse('git+ssh://git@github.com/owner/repo@branch'));
+        self::assertTrue($this->parserChain->canParse('git+git@github.com:owner/repo@branch'));
     }
 
-    public function testCanParseSshUrls(): void
+    /**
+     * @test
+     */
+    public function cannotParseNonGitUrls(): void
     {
-        $this->assertTrue($this->parserChain->canParse('git+ssh://git@github.com/owner/repo@branch'));
-        $this->assertTrue($this->parserChain->canParse('git+git@github.com:owner/repo@branch'));
+        self::assertFalse($this->parserChain->canParse('https://github.com/owner/repo'));
+        self::assertFalse($this->parserChain->canParse('invalid-url'));
     }
 
-    public function testCannotParseNonGitUrls(): void
-    {
-        $this->assertFalse($this->parserChain->canParse('https://github.com/owner/repo'));
-        $this->assertFalse($this->parserChain->canParse('invalid-url'));
-    }
-
-    public function testParseHttpsUrl(): void
+    /**
+     * @test
+     */
+    public function parseHttpsUrl(): void
     {
         $url = 'git+https://github.com/symfony/symfony@6.3';
         $result = $this->parserChain->parse($url);
 
-        $this->assertEquals('https', $result->scheme);
-        $this->assertEquals('github.com', $result->host);
-        $this->assertEquals('symfony', $result->owner);
-        $this->assertEquals('symfony', $result->repository);
-        $this->assertEquals('6.3', $result->reference);
+        self::assertEquals('https', $result->scheme);
+        self::assertEquals('github.com', $result->host);
+        self::assertEquals('symfony', $result->owner);
+        self::assertEquals('symfony', $result->repository);
+        self::assertEquals('6.3', $result->reference);
     }
 
-    public function testParseSshUrl(): void
+    /**
+     * @test
+     */
+    public function parseSshUrl(): void
     {
         $url = 'git+ssh://git@gitlab.com/group/project@main';
         $result = $this->parserChain->parse($url);
 
-        $this->assertEquals('ssh', $result->scheme);
-        $this->assertEquals('gitlab.com', $result->host);
-        $this->assertEquals('group', $result->owner);
-        $this->assertEquals('project', $result->repository);
-        $this->assertEquals('main', $result->reference);
+        self::assertEquals('ssh', $result->scheme);
+        self::assertEquals('gitlab.com', $result->host);
+        self::assertEquals('group', $result->owner);
+        self::assertEquals('project', $result->repository);
+        self::assertEquals('main', $result->reference);
     }
 
-    public function testParseInvalidUrlThrowsException(): void
+    /**
+     * @test
+     */
+    public function parseInvalidUrlThrowsException(): void
     {
         $this->expectException(InvalidUrlException::class);
         $this->expectExceptionMessage('URL must start with git+ prefix');
         $this->parserChain->parse('https://github.com/owner/repo');
     }
 
-    public function testParseUnsupportedFormatThrowsException(): void
+    /**
+     * @test
+     */
+    public function parseUnsupportedFormatThrowsException(): void
     {
         $this->expectException(InvalidUrlException::class);
         $this->expectExceptionMessage('No parser could handle this URL format');
         $this->parserChain->parse('git+ftp://example.com/repo@branch');
     }
 
-    public function testGetSupportedPatterns(): void
+    /**
+     * @test
+     */
+    public function getSupportedPatterns(): void
     {
         $patterns = $this->parserChain->getSupportedPatterns();
 
-        $this->assertArrayHasKey('HTTPS', $patterns);
-        $this->assertArrayHasKey('SSH', $patterns);
-        $this->assertIsArray($patterns['HTTPS']);
-        $this->assertIsArray($patterns['SSH']);
-        $this->assertNotEmpty($patterns['HTTPS']);
-        $this->assertNotEmpty($patterns['SSH']);
+        self::assertArrayHasKey('HTTPS', $patterns);
+        self::assertArrayHasKey('SSH', $patterns);
+        self::assertIsArray($patterns['HTTPS']);
+        self::assertIsArray($patterns['SSH']);
+        self::assertNotEmpty($patterns['HTTPS']);
+        self::assertNotEmpty($patterns['SSH']);
     }
 
     /**
      * @dataProvider urlPriorityProvider
+     *
+     * @test
      */
-    public function testParserPriority(string $url, string $expectedScheme): void
+    public function parserPriority(string $url, string $expectedScheme): void
     {
         $result = $this->parserChain->parse($url);
-        $this->assertEquals($expectedScheme, $result->scheme);
+        self::assertEquals($expectedScheme, $result->scheme);
     }
 
     /**
@@ -105,16 +130,21 @@ class UrlParserChainTest extends TestCase
         return [
             'HTTPS has priority' => [
                 'git+https://github.com/owner/repo@branch',
-                'https'
+                'https',
             ],
             'SSH when HTTPS not applicable' => [
                 'git+ssh://git@github.com/owner/repo@branch',
-                'ssh'
+                'ssh',
             ],
             'SSH shorthand' => [
                 'git+git@github.com:owner/repo@branch',
-                'ssh'
-            ]
+                'ssh',
+            ],
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->parserChain = new UrlParserChain();
     }
 }

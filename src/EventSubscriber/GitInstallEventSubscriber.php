@@ -17,7 +17,7 @@ use Neologik\ComposerGitInstaller\Security\ValidationPipeline;
 
 /**
  * Event subscriber that handles PRE_COMMAND_RUN events to intercept git+ URLs.
- * 
+ *
  * This subscriber detects git+ syntax in composer require commands and processes
  * them through the validation and transformation pipeline.
  */
@@ -26,18 +26,26 @@ class GitInstallEventSubscriber implements EventSubscriberInterface
     private IOInterface $io;
     private CommandProcessor $commandProcessor;
 
+    /**
+     * GitInstallEventSubscriber constructor.
+     *
+     * @param IOInterface $io The input/output interface
+     * @param UrlParserChain $urlParser The URL parser chain instance
+     * @param PackageResolver $packageResolver The package resolver instance
+     * @param ValidationPipeline $validator The validation pipeline instance
+     */
     public function __construct(
         IOInterface $io,
         UrlParserChain $urlParser,
         PackageResolver $packageResolver,
-        ValidationPipeline $validator
+        ValidationPipeline $validator,
     ) {
         $this->io = $io;
         $this->commandProcessor = new CommandProcessor(
             $urlParser,
             $packageResolver,
             $validator,
-            $io
+            $io,
         );
     }
 
@@ -53,7 +61,7 @@ class GitInstallEventSubscriber implements EventSubscriberInterface
 
     /**
      * Handle PRE_COMMAND_RUN event to intercept git+ URLs.
-     * 
+     *
      * This method processes composer require/install/update commands and detects
      * git+ syntax in package arguments. When found, it validates and transforms
      * the URLs into proper VCS repositories that Composer can handle.
@@ -71,14 +79,14 @@ class GitInstallEventSubscriber implements EventSubscriberInterface
         $this->io->writeError(
             sprintf('<info>Git Install Plugin: Processing %s command</info>', $command),
             true,
-            IOInterface::DEBUG
+            IOInterface::DEBUG,
         );
 
         try {
             $this->commandProcessor->processCommand($input, $command);
         } catch (GitInstallException $e) {
             $this->io->writeError(
-                sprintf('<error>Git Install Plugin Error: %s</error>', $e->getMessage())
+                sprintf('<error>Git Install Plugin Error: %s</error>', $e->getMessage()),
             );
             throw $e;
         }

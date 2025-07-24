@@ -13,27 +13,31 @@ use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * Processes Composer command arguments to detect and transform git+ URLs.
- * 
+ *
  * This class handles the command line argument analysis, git URL detection,
  * package name resolution, and command argument transformation for normal
  * Composer processing.
  */
 class CommandProcessor
 {
-    /** @var UrlParserChain */
     private UrlParserChain $urlParser;
-    /** @var PackageResolver */
     private PackageResolver $packageResolver;
-    /** @var ValidationPipeline */
     private ValidationPipeline $validator;
-    /** @var IOInterface */
     private IOInterface $io;
 
+    /**
+     * CommandProcessor constructor.
+     *
+     * @param UrlParserChain $urlParser The URL parser chain instance
+     * @param PackageResolver $packageResolver The package resolver instance
+     * @param ValidationPipeline $validator The validation pipeline instance
+     * @param IOInterface $io The input/output interface
+     */
     public function __construct(
         UrlParserChain $urlParser,
         PackageResolver $packageResolver,
         ValidationPipeline $validator,
-        IOInterface $io
+        IOInterface $io,
     ) {
         $this->urlParser = $urlParser;
         $this->packageResolver = $packageResolver;
@@ -43,9 +47,10 @@ class CommandProcessor
 
     /**
      * Process command input to detect and transform git+ URLs.
-     * 
-     * @param InputInterface $input The command input containing arguments
-     * @param string $command The command name being executed
+     *
+     * @param InputInterface $input   The command input containing arguments
+     * @param string         $command The command name being executed
+     *
      * @throws GitInstallException If URL processing fails
      */
     public function processCommand(InputInterface $input, string $command): void
@@ -60,7 +65,7 @@ class CommandProcessor
         $this->io->writeError(
             sprintf('<info>Git Install Plugin: Analyzing %d package(s) for git+ URLs</info>', count($packages)),
             true,
-            IOInterface::DEBUG
+            IOInterface::DEBUG,
         );
 
         $modified = false;
@@ -72,7 +77,7 @@ class CommandProcessor
                 $this->io->writeError(
                     sprintf('<info>Processing git+ URL: %s</info>', $package),
                     true,
-                    IOInterface::VERBOSE
+                    IOInterface::VERBOSE,
                 );
 
                 $transformedPackage = $this->transformGitUrl($package);
@@ -90,8 +95,9 @@ class CommandProcessor
 
     /**
      * Check if a package string contains git+ URL syntax.
-     * 
+     *
      * @param string $package The package string to check
+     *
      * @return bool True if package is a git+ URL
      */
     public function isGitUrl(string $package): bool
@@ -101,37 +107,38 @@ class CommandProcessor
 
     /**
      * Transform a git+ URL into a Composer-compatible package reference.
-     * 
+     *
      * This method parses the git+ URL, validates it through the security pipeline,
      * registers the VCS repository with Composer, and returns the package name.
-     * 
+     *
      * @param string $gitUrl The git+ URL to transform
-     * @return string The resolved package name
+     *
      * @throws GitInstallException If URL parsing or validation fails
+     *
+     * @return string The resolved package name
      */
     public function transformGitUrl(string $gitUrl): string
     {
         try {
             // Parse the git+ URL using the chain of responsibility pattern
             $parsedUrl = $this->urlParser->parse($gitUrl);
-            
+
             // Validate through security pipeline (strategy pattern)
             $this->validator->validate($parsedUrl);
-            
+
             // Register repository and resolve package name
             $packageName = $this->packageResolver->resolve($parsedUrl);
-            
+
             $this->io->writeError(
                 sprintf('<info>Registered VCS repository for package: %s</info>', $packageName),
                 true,
-                IOInterface::VERBOSE
+                IOInterface::VERBOSE,
             );
-            
+
             return $packageName;
-            
         } catch (GitInstallException $e) {
             $this->io->writeError(
-                sprintf('<error>Failed to process git+ URL %s: %s</error>', $gitUrl, $e->getMessage())
+                sprintf('<error>Failed to process git+ URL %s: %s</error>', $gitUrl, $e->getMessage()),
             );
             throw $e;
         }
@@ -141,6 +148,7 @@ class CommandProcessor
      * Extract git+ URLs from package arguments.
      *
      * @param array<string> $packages Array of package arguments
+     *
      * @return array<string> Array containing only git+ URLs
      */
     public function extractGitUrls(array $packages): array
@@ -152,6 +160,7 @@ class CommandProcessor
      * Get package names for git+ URLs without processing them.
      *
      * @param array<string> $gitUrls Array of git+ URLs
+     *
      * @return array<string> Array of suggested package names
      */
     public function getPackageNames(array $gitUrls): array
@@ -166,7 +175,7 @@ class CommandProcessor
                 $this->io->writeError(
                     sprintf('<warning>Could not extract package name from %s: %s</warning>', $gitUrl, $e->getMessage()),
                     true,
-                    IOInterface::VERBOSE
+                    IOInterface::VERBOSE,
                 );
             }
         }
@@ -178,6 +187,7 @@ class CommandProcessor
      * Handle conflicts when multiple git+ packages suggest the same name.
      *
      * @param array<string> $gitUrls Array of git+ URLs
+     *
      * @return array<string,string> Resolved package names with conflict resolution
      */
     public function handlePackageNameConflicts(array $gitUrls): array
@@ -197,10 +207,9 @@ class CommandProcessor
                 } else {
                     $packageNames[$suggestedName] = $gitUrl;
                 }
-
             } catch (GitInstallException $e) {
                 $this->io->writeError(
-                    sprintf('<error>Error resolving package name for %s: %s</error>', $gitUrl, $e->getMessage())
+                    sprintf('<error>Error resolving package name for %s: %s</error>', $gitUrl, $e->getMessage()),
                 );
             }
         }
@@ -209,7 +218,7 @@ class CommandProcessor
             $this->io->writeError(
                 sprintf('<warning>Resolved %d package name conflicts</warning>', count($conflicts)),
                 true,
-                IOInterface::VERBOSE
+                IOInterface::VERBOSE,
             );
         }
 
@@ -219,8 +228,8 @@ class CommandProcessor
     /**
      * Update command arguments with transformed packages.
      *
-     * @param InputInterface $input The command input to modify
-     * @param array<string> $packages The updated packages array
+     * @param InputInterface $input    The command input to modify
+     * @param array<string>  $packages The updated packages array
      */
     private function updateCommandArguments(InputInterface $input, array $packages): void
     {
@@ -229,14 +238,14 @@ class CommandProcessor
         $this->io->writeError(
             '<info>Git Install Plugin: Command arguments updated with transformed packages</info>',
             true,
-            IOInterface::DEBUG
+            IOInterface::DEBUG,
         );
     }
 
     /**
      * Log the transformation results for audit purposes.
      *
-     * @param string $command The command that was processed
+     * @param string        $command     The command that was processed
      * @param array<string> $gitPackages The git+ URLs that were processed
      */
     private function logTransformation(string $command, array $gitPackages): void
@@ -245,17 +254,17 @@ class CommandProcessor
             sprintf(
                 '<info>Git Install Plugin: Successfully processed %d git+ URL(s) in %s command</info>',
                 count($gitPackages),
-                $command
+                $command,
             ),
             true,
-            IOInterface::VERBOSE
+            IOInterface::VERBOSE,
         );
 
         foreach ($gitPackages as $gitUrl) {
             $this->io->writeError(
                 sprintf('  - %s', $gitUrl),
                 true,
-                IOInterface::DEBUG
+                IOInterface::DEBUG,
             );
         }
     }

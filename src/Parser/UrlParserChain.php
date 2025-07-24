@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Parser;
 
-use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 use Neologik\ComposerGitInstaller\Exception\InvalidUrlException;
+use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 
 /**
  * Chain of Responsibility coordinator for URL parsing.
@@ -29,15 +29,16 @@ class UrlParserChain
             throw new InvalidUrlException($url, 'URL must start with git+ prefix');
         }
 
-        if ($this->firstParser === null) {
+        if (null === $this->firstParser) {
             throw new InvalidUrlException($url, 'No parsers available');
         }
 
         try {
             $result = $this->firstParser->parse($url);
-            if ($result === null) {
+            if (null === $result) {
                 throw new InvalidUrlException($url, 'No parser could handle this URL format');
             }
+
             return $result;
         } catch (InvalidUrlException $e) {
             if (str_contains($e->getMessage(), 'Invalid SSH shorthand URL format')) {
@@ -58,24 +59,11 @@ class UrlParserChain
 
         try {
             $this->parse($url);
+
             return true;
         } catch (InvalidUrlException) {
             return false;
         }
-    }
-
-    /**
-     * Build the chain of parsers in order of preference.
-     */
-    private function buildChain(): void
-    {
-        // Create parsers in order of preference
-        $httpsParser = new HttpsUrlParser();
-        $sshParser = new SshUrlParser();
-        
-        // Build the chain: HTTPS -> SSH
-        $this->firstParser = $httpsParser;
-        $httpsParser->setNext($sshParser);
     }
 
     /**
@@ -91,13 +79,27 @@ class UrlParserChain
                 'git+https://github.com/owner/repo@branch',
                 'git+https://gitlab.com/owner/repo@v1.0.0',
                 'git+https://bitbucket.org/owner/repo@commit-hash',
-                'git+https://github.com/owner/repo@branch#subdirectory'
+                'git+https://github.com/owner/repo@branch#subdirectory',
             ],
             'SSH' => [
                 'git+ssh://git@github.com/owner/repo@branch',
                 'git+git@github.com:owner/repo@branch',
-                'git+git@gitlab.com:owner/repo@v1.0.0#subdirectory'
-            ]
+                'git+git@gitlab.com:owner/repo@v1.0.0#subdirectory',
+            ],
         ];
+    }
+
+    /**
+     * Build the chain of parsers in order of preference.
+     */
+    private function buildChain(): void
+    {
+        // Create parsers in order of preference
+        $httpsParser = new HttpsUrlParser();
+        $sshParser = new SshUrlParser();
+
+        // Build the chain: HTTPS -> SSH
+        $this->firstParser = $httpsParser;
+        $httpsParser->setNext($sshParser);
     }
 }

@@ -7,9 +7,8 @@ namespace Neologik\ComposerGitInstaller\Resolver;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Repository\RepositoryManager;
-use Composer\Repository\VcsRepository;
-use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 use Neologik\ComposerGitInstaller\Exception\GitInstallException;
+use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 
 /**
  * Resolves git+ URLs into Composer packages and repositories.
@@ -18,9 +17,15 @@ class PackageResolver
 {
     private RepositoryManager $repositoryManager;
 
+    /**
+     * PackageResolver constructor.
+     *
+     * @param Composer $composer The Composer instance
+     * @param IOInterface $io The input/output interface
+     */
     public function __construct(
         Composer $composer,
-        private readonly IOInterface $io
+        private readonly IOInterface $io,
     ) {
         $this->repositoryManager = $composer->getRepositoryManager();
     }
@@ -32,17 +37,26 @@ class PackageResolver
     {
         $packageName = $this->generatePackageName($parsedUrl);
         $this->registerRepository($parsedUrl, $packageName);
-        
+
         $this->io->writeError(
-            sprintf('<info>Resolved package: %s from %s</info>', 
-                $packageName, 
-                $parsedUrl->getRepositoryIdentifier()
+            sprintf(
+                '<info>Resolved package: %s from %s</info>',
+                $packageName,
+                $parsedUrl->getRepositoryIdentifier(),
             ),
             true,
-            IOInterface::VERBOSE
+            IOInterface::VERBOSE,
         );
-        
+
         return $packageName;
+    }
+
+    /**
+     * Get the repository manager instance.
+     */
+    public function getRepositoryManager(): RepositoryManager
+    {
+        return $this->repositoryManager;
     }
 
     /**
@@ -51,7 +65,7 @@ class PackageResolver
     private function generatePackageName(ParsedUrl $parsedUrl): string
     {
         $baseName = $parsedUrl->getSuggestedPackageName();
-        
+
         // Check for conflicts and resolve them
         return $this->resolveNamingConflicts($baseName, $parsedUrl);
     }
@@ -75,17 +89,17 @@ class PackageResolver
         try {
             $repository = $this->repositoryManager->createRepository('vcs', $config);
             $this->repositoryManager->prependRepository($repository);
-            
+
             $this->io->writeError(
                 sprintf('<info>Registered VCS repository: %s</info>', $parsedUrl->getGitUrl()),
                 true,
-                IOInterface::VERBOSE
+                IOInterface::VERBOSE,
             );
         } catch (\Exception $e) {
             throw new GitInstallException(
                 sprintf('Failed to register repository: %s', $e->getMessage()),
                 0,
-                $e
+                $e,
             );
         }
     }
@@ -98,30 +112,23 @@ class PackageResolver
         // For now, use the base name - in a full implementation, we would
         // check for existing packages and resolve conflicts
         $resolvedName = $baseName;
-        
+
         // Add host prefix if not from major providers
         $majorProviders = ['github.com', 'gitlab.com', 'bitbucket.org'];
         if (!in_array($parsedUrl->host, $majorProviders, true)) {
             $hostPrefix = str_replace('.', '-', $parsedUrl->host);
-            $resolvedName = sprintf('%s/%s-%s', 
-                $parsedUrl->owner, 
-                $hostPrefix, 
-                $parsedUrl->repository
+            $resolvedName = sprintf(
+                '%s/%s-%s',
+                $parsedUrl->owner,
+                $hostPrefix,
+                $parsedUrl->repository,
             );
-            
-            if ($parsedUrl->reference !== 'main' && $parsedUrl->reference !== 'master') {
+
+            if ('main' !== $parsedUrl->reference && 'master' !== $parsedUrl->reference) {
                 $resolvedName .= '-' . $parsedUrl->reference;
             }
         }
-        
-        return strtolower($resolvedName);
-    }
 
-    /**
-     * Get the repository manager instance.
-     */
-    public function getRepositoryManager(): RepositoryManager
-    {
-        return $this->repositoryManager;
+        return mb_strtolower($resolvedName);
     }
 }

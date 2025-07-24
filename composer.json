@@ -16,6 +16,7 @@
         "composer/composer": "^2.6"
     },  
     "require-dev": {
+        "escapestudios/symfony2-coding-standard": "^3.16",
         "friendsofphp/php-cs-fixer": "^3.84",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.0",
@@ -46,8 +47,8 @@
     "scripts": {
         "test": "phpunit --testdox",
         "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage",
-        "cs-check": "phpcs --standard=PSR12 src/ tests/",
-        "cs-fix": "phpcbf --standard=PSR12 src/ tests/",
+        "cs-check": "phpcs src/ tests/",
+        "cs-fix": "phpcbf src/ tests/",
         "static-analysis": "phpstan analyse src/ tests/ --level=6",
         "quality": [
             "@cs-check",

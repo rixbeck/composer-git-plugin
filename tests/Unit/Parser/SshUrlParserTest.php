@@ -94,6 +94,7 @@ class SshUrlParserTest extends TestCase
 
     /**
      * @dataProvider validSshUrlProvider
+     * @param array<string, string> $expected
      */
     public function testParseValidSshUrls(string $url, array $expected): void
     {
@@ -105,6 +106,9 @@ class SshUrlParserTest extends TestCase
         $this->assertEquals($expected['reference'], $result->reference);
     }
 
+    /**
+     * @return array<string, array{string, array<string, string>}>
+     */
     public static function validSshUrlProvider(): array
     {
         return [

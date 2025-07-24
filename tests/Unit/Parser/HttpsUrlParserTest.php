@@ -90,6 +90,7 @@ class HttpsUrlParserTest extends TestCase
 
     /**
      * @dataProvider validUrlProvider
+     * @param array<string, string> $expected
      */
     public function testParseValidUrls(string $url, array $expected): void
     {
@@ -101,6 +102,9 @@ class HttpsUrlParserTest extends TestCase
         $this->assertEquals($expected['reference'], $result->reference);
     }
 
+    /**
+     * @return array<string, array{string, array<string, string>}>
+     */
     public static function validUrlProvider(): array
     {
         return [

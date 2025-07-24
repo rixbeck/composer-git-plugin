@@ -97,6 +97,9 @@ class UrlParserChainTest extends TestCase
         $this->assertEquals($expectedScheme, $result->scheme);
     }
 
+    /**
+     * @return array<string, array{string, string}>
+     */
     public static function urlPriorityProvider(): array
     {
         return [

@@ -19,6 +19,9 @@ class HostWhitelistValidator implements ValidatorInterface
         'bitbucket.org',
     ];
 
+    /**
+     * @var string[]
+     */
     private array $allowedHosts;
 
     public function __construct(private readonly Composer $composer)
@@ -66,6 +69,9 @@ class HostWhitelistValidator implements ValidatorInterface
     /**
      * Load allowed hosts from Composer configuration or use defaults.
      */
+    /**
+     * @return string[]
+     */
     private function loadAllowedHosts(): array
     {
         $config = $this->composer->getConfig();
@@ -89,6 +95,9 @@ class HostWhitelistValidator implements ValidatorInterface
 
     /**
      * Get current allowed hosts.
+     */
+    /**
+     * @return string[]
      */
     public function getAllowedHosts(): array
     {

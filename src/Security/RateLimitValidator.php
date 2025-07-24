@@ -17,6 +17,9 @@ class RateLimitValidator implements ValidatorInterface
     private const DEFAULT_TIME_WINDOW = 3600; // 1 hour in seconds
     private const CACHE_FILE = 'git-installer-rate-limit.json';
 
+    /**
+     * @var array<string, int[]>
+     */
     private array $requestCounts = [];
     private string $cacheFile;
 
@@ -130,6 +133,9 @@ class RateLimitValidator implements ValidatorInterface
 
     /**
      * Get current request counts (for testing).
+     */
+    /**
+     * @return array<string, int[]>
      */
     public function getRequestCounts(): array
     {

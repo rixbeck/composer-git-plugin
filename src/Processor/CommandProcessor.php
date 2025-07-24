@@ -20,9 +20,13 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class CommandProcessor
 {
+    /** @var UrlParserChain */
     private UrlParserChain $urlParser;
+    /** @var PackageResolver */
     private PackageResolver $packageResolver;
+    /** @var ValidationPipeline */
     private ValidationPipeline $validator;
+    /** @var IOInterface */
     private IOInterface $io;
 
     public function __construct(
@@ -62,6 +66,7 @@ class CommandProcessor
         $modified = false;
         $gitPackages = [];
 
+        /** @var string[] $packages */
         foreach ($packages as $index => $package) {
             if ($this->isGitUrl($package)) {
                 $this->io->writeError(
@@ -134,9 +139,9 @@ class CommandProcessor
 
     /**
      * Extract git+ URLs from package arguments.
-     * 
-     * @param array $packages Array of package arguments
-     * @return array Array containing only git+ URLs
+     *
+     * @param array<string> $packages Array of package arguments
+     * @return array<string> Array containing only git+ URLs
      */
     public function extractGitUrls(array $packages): array
     {
@@ -145,14 +150,14 @@ class CommandProcessor
 
     /**
      * Get package names for git+ URLs without processing them.
-     * 
-     * @param array $gitUrls Array of git+ URLs
-     * @return array Array of suggested package names
+     *
+     * @param array<string> $gitUrls Array of git+ URLs
+     * @return array<string> Array of suggested package names
      */
     public function getPackageNames(array $gitUrls): array
     {
         $packageNames = [];
-        
+
         foreach ($gitUrls as $gitUrl) {
             try {
                 $parsedUrl = $this->urlParser->parse($gitUrl);
@@ -165,26 +170,26 @@ class CommandProcessor
                 );
             }
         }
-        
+
         return $packageNames;
     }
 
     /**
      * Handle conflicts when multiple git+ packages suggest the same name.
-     * 
-     * @param array $gitUrls Array of git+ URLs
-     * @return array Resolved package names with conflict resolution
+     *
+     * @param array<string> $gitUrls Array of git+ URLs
+     * @return array<string,string> Resolved package names with conflict resolution
      */
     public function handlePackageNameConflicts(array $gitUrls): array
     {
         $packageNames = [];
         $conflicts = [];
-        
+
         foreach ($gitUrls as $gitUrl) {
             try {
                 $parsedUrl = $this->urlParser->parse($gitUrl);
                 $suggestedName = $parsedUrl->getSuggestedPackageName();
-                
+
                 if (isset($packageNames[$suggestedName])) {
                     $conflicts[] = $suggestedName;
                     // Add repository identifier suffix to resolve conflict
@@ -192,14 +197,14 @@ class CommandProcessor
                 } else {
                     $packageNames[$suggestedName] = $gitUrl;
                 }
-                
+
             } catch (GitInstallException $e) {
                 $this->io->writeError(
                     sprintf('<error>Error resolving package name for %s: %s</error>', $gitUrl, $e->getMessage())
                 );
             }
         }
-        
+
         if (!empty($conflicts)) {
             $this->io->writeError(
                 sprintf('<warning>Resolved %d package name conflicts</warning>', count($conflicts)),
@@ -207,20 +212,20 @@ class CommandProcessor
                 IOInterface::VERBOSE
             );
         }
-        
+
         return array_flip($packageNames);
     }
 
     /**
      * Update command arguments with transformed packages.
-     * 
+     *
      * @param InputInterface $input The command input to modify
-     * @param array $packages The updated packages array
+     * @param array<string> $packages The updated packages array
      */
     private function updateCommandArguments(InputInterface $input, array $packages): void
     {
         $input->setArgument('packages', $packages);
-        
+
         $this->io->writeError(
             '<info>Git Install Plugin: Command arguments updated with transformed packages</info>',
             true,
@@ -230,9 +235,9 @@ class CommandProcessor
 
     /**
      * Log the transformation results for audit purposes.
-     * 
+     *
      * @param string $command The command that was processed
-     * @param array $gitPackages The git+ URLs that were processed
+     * @param array<string> $gitPackages The git+ URLs that were processed
      */
     private function logTransformation(string $command, array $gitPackages): void
     {
@@ -245,7 +250,7 @@ class CommandProcessor
             true,
             IOInterface::VERBOSE
         );
-        
+
         foreach ($gitPackages as $gitUrl) {
             $this->io->writeError(
                 sprintf('  - %s', $gitUrl),

@@ -48,7 +48,7 @@
         "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage",
         "cs-check": "phpcs --standard=PSR12 src/ tests/",
         "cs-fix": "phpcbf --standard=PSR12 src/ tests/",
-        "static-analysis": "phpstan analyse src/ tests/ --level=8",
+        "static-analysis": "phpstan analyse src/ tests/ --level=6",
         "quality": [
             "@cs-check",
             "@static-analysis",

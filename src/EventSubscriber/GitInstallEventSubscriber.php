@@ -23,25 +23,16 @@ use Neologik\ComposerGitInstaller\Security\ValidationPipeline;
  */
 class GitInstallEventSubscriber implements EventSubscriberInterface
 {
-    private Composer $composer;
     private IOInterface $io;
-    private UrlParserChain $urlParser;
-    private PackageResolver $packageResolver;
-    private ValidationPipeline $validator;
     private CommandProcessor $commandProcessor;
 
     public function __construct(
-        Composer $composer,
         IOInterface $io,
         UrlParserChain $urlParser,
         PackageResolver $packageResolver,
         ValidationPipeline $validator
     ) {
-        $this->composer = $composer;
         $this->io = $io;
-        $this->urlParser = $urlParser;
-        $this->packageResolver = $packageResolver;
-        $this->validator = $validator;
         $this->commandProcessor = new CommandProcessor(
             $urlParser,
             $packageResolver,

@@ -21,7 +21,6 @@ use Neologik\ComposerGitInstaller\Security\ValidationPipeline;
 class GitInstallPlugin implements PluginInterface
 {
     private ?Composer $composer = null;
-    private ?IOInterface $io = null;
     private ?GitInstallEventSubscriber $eventSubscriber = null;
 
     /**
@@ -33,7 +32,6 @@ class GitInstallPlugin implements PluginInterface
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
-        $this->io = $io;
 
         // Initialize components
         $urlParser = new UrlParserChain();
@@ -42,7 +40,6 @@ class GitInstallPlugin implements PluginInterface
 
         // Create and register event subscriber
         $this->eventSubscriber = new GitInstallEventSubscriber(
-            $composer,
             $io,
             $urlParser,
             $packageResolver,
@@ -65,16 +62,17 @@ class GitInstallPlugin implements PluginInterface
             $eventDispatcher = $this->composer->getEventDispatcher();
             foreach ($this->eventSubscriber->getSubscribedEvents() as $eventName => $params) {
                 if (is_string($params)) {
-                    $eventDispatcher->removeListener($eventName, [$this->eventSubscriber, $params]);
+                    $eventDispatcher->removeListener($eventName);
                 } elseif (is_array($params) && isset($params[0])) {
                     $method = $params[0];
-                    $eventDispatcher->removeListener($eventName, [$this->eventSubscriber, $method]);
+                    $eventDispatcher->removeListener($eventName);
+                } else {
+                    $eventDispatcher->removeListener($eventName);
                 }
             }
         }
 
         $this->composer = null;
-        $this->io = null;
         $this->eventSubscriber = null;
     }
 

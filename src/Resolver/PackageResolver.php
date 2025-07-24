@@ -19,7 +19,7 @@ class PackageResolver
     private RepositoryManager $repositoryManager;
 
     public function __construct(
-        private readonly Composer $composer,
+        Composer $composer,
         private readonly IOInterface $io
     ) {
         $this->repositoryManager = $composer->getRepositoryManager();

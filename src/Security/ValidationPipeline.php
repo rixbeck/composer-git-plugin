@@ -14,6 +14,9 @@ use Neologik\ComposerGitInstaller\Exception\SecurityException;
  */
 class ValidationPipeline
 {
+    /**
+     * @var ValidatorInterface[]
+     */
     private array $validators = [];
 
     public function __construct(
@@ -62,6 +65,9 @@ class ValidationPipeline
 
     /**
      * Get all registered validators.
+     */
+    /**
+     * @return ValidatorInterface[]
      */
     public function getValidators(): array
     {

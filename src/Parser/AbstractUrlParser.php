@@ -48,6 +48,9 @@ abstract class AbstractUrlParser implements UrlParserInterface
     /**
      * Extract reference (branch/tag/commit) and determine its type.
      */
+    /**
+     * @return array{0: string, 1: string}
+     */
     protected function extractReference(string $reference): array
     {
         // Default to branch type

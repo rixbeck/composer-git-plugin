@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Neologik\ComposerGitInstaller\Tests\Unit\Security;
 
-use PHPUnit\Framework\TestCase;
-use Neologik\ComposerGitInstaller\Security\UrlFormatValidator;
-use Neologik\ComposerGitInstaller\Model\ParsedUrl;
 use Neologik\ComposerGitInstaller\Exception\SecurityException;
+use Neologik\ComposerGitInstaller\Model\ParsedUrl;
+use Neologik\ComposerGitInstaller\Security\UrlFormatValidator;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for URL format validator.
@@ -15,11 +15,6 @@ use Neologik\ComposerGitInstaller\Exception\SecurityException;
 class UrlFormatValidatorTest extends TestCase
 {
     private UrlFormatValidator $validator;
-
-    protected function setUp(): void
-    {
-        $this->validator = new UrlFormatValidator();
-    }
 
     public function testGetName(): void
     {
@@ -79,7 +74,7 @@ class UrlFormatValidatorTest extends TestCase
 
     public function testValidateExcessivelyLongUrl(): void
     {
-        $longUrl = 'git+https://github.com/' . str_repeat('a', 2500) . '/repo@main';
+        $longUrl = 'git+https://github.com/'.str_repeat('a', 2500).'/repo@main';
         $parsedUrl = new ParsedUrl(
             originalUrl: $longUrl,
             scheme: 'https',
@@ -167,6 +162,9 @@ class UrlFormatValidatorTest extends TestCase
         $this->assertTrue(true);
     }
 
+    /**
+     * @return array<int, array{string}>
+     */
     public static function validHostProvider(): array
     {
         return [
@@ -174,7 +172,7 @@ class UrlFormatValidatorTest extends TestCase
             ['gitlab.com'],
             ['bitbucket.org'],
             ['git.example.com'],
-            ['code.company.org']
+            ['code.company.org'],
         ];
     }
 
@@ -197,6 +195,9 @@ class UrlFormatValidatorTest extends TestCase
         $this->validator->validate($parsedUrl);
     }
 
+    /**
+     * @return array<int, array{string}>
+     */
     public static function invalidHostProvider(): array
     {
         return [
@@ -206,5 +207,10 @@ class UrlFormatValidatorTest extends TestCase
             ['-invalid.com'],  // Starting with dash
             ['invalid-.com'],  // Ending with dash
         ];
+    }
+
+    protected function setUp(): void
+    {
+        $this->validator = new UrlFormatValidator();
     }
 }

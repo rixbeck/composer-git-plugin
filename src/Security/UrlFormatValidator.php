@@ -108,6 +108,7 @@ class UrlFormatValidator implements ValidatorInterface
             'repository' => $parsedUrl->repository,
         ];
 
+        /** @var array<string,string> $components */
         foreach ($components as $name => $value) {
             if (strlen($value) > self::MAX_COMPONENT_LENGTH) {
                 throw new SecurityException(

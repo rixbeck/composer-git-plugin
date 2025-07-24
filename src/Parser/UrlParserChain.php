@@ -81,6 +81,9 @@ class UrlParserChain
     /**
      * Get all supported URL patterns for documentation/validation.
      */
+    /**
+     * @return array<string, string[]>
+     */
     public function getSupportedPatterns(): array
     {
         return [

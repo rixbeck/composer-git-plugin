@@ -188,6 +188,9 @@ class ParsedUrlTest extends TestCase
         $this->assertEquals($expectedType, $parsedUrl->referenceType);
     }
 
+    /**
+     * @return array<string, array{string, string}>
+     */
     public static function referenceTypeProvider(): array
     {
         return [

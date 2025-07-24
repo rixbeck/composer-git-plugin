@@ -1,0 +1,59 @@
+{
+    "name": "neologik/composer-git-installer",
+    "description": "Composer plugin for installing packages from Git repositories using git+<repo>@<branch> syntax",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "keywords": ["composer", "plugin", "git", "vcs", "installer"],
+    "authors": [
+        {
+            "name": "Rix Beck",
+            "email": "rix@neologik.hu"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "composer-plugin-api": "^2.6",
+        "composer/composer": "^2.6"
+    },  
+    "require-dev": {
+        "composer/composer": "^2.6",
+        "friendsofphp/php-cs-fixer": "^3.84",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10.0",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Neologik\\ComposerGitInstaller\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Neologik\\ComposerGitInstaller\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "class": "Neologik\\ComposerGitInstaller\\GitInstallPlugin",
+        "plugin-optional": false
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "neologik/composer-git-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "cs-check": "phpcs --standard=PSR12 src/ tests/",
+        "cs-fix": "phpcbf --standard=PSR12 src/ tests/",
+        "static-analysis": "phpstan analyse src/ tests/ --level=8",
+        "quality": [
+            "@cs-check",
+            "@static-analysis",
+            "@test"
+        ]
+    }
+}

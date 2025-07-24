@@ -21,7 +21,7 @@ class RateLimitValidator implements ValidatorInterface
 
     public function __construct(private readonly IOInterface $io)
     {
-        $this->cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::CACHE_FILE;
+        $this->cacheFile = sys_get_temp_dir() . '/' . self::CACHE_FILE;
         $this->loadRequestCounts();
     }
 

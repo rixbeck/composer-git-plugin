@@ -1,0 +1,16 @@
+/vendor/
+.idea/
+composer.lock
+composer.phar
+phpunit.xml
+.phpunit.result.cache
+build/
+coverage/
+.env
+.DS_Store
+.phpunit.cache
+.ruru/
+.roo/
+.roomodes
+.rooignore
+/logs
